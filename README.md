@@ -1,11 +1,11 @@
-<h1 align="center"> Fast FastAPI boilerplate</h1>
+<h1 align="center"> Fast FastAPI boilerplate (SQLmodel version)</h1>
 <p align="center" markdown=1>
-  <i>Yet another template to speed your FastAPI development up.</i>
+  <i>Yet another template to speed your FastAPI development up. This time, using SQLModel.</i>
 </p>
 
 <p align="center">
-  <a href="https://github.com/igormagalhaesr/FastAPI-boilerplate">
-    <img src="https://user-images.githubusercontent.com/43156212/277095260-ef5d4496-8290-4b18-99b2-0c0b5500504e.png" alt="Blue Rocket with FastAPI Logo as its window. There is a word FAST written" width="35%" height="auto">
+  <a href="https://github.com/igormagalhaesr/SQLModel-boilerplate">
+    <img src="https://raw.githubusercontent.com/igorbenav/docs-images/main/sqlmodelboilerplate.png?raw=true" alt="Purple Rocket with FastAPI Logo as its window. There is a word FAST written" width="35%" height="auto">
   </a>
 </p>
 
@@ -15,9 +15,6 @@
   </a>
   <a href="https://fastapi.tiangolo.com">
       <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" alt="FastAPI">
-  </a>
-  <a href="https://docs.pydantic.dev/2.4/">
-      <img src="https://img.shields.io/badge/Pydantic-E92063?logo=pydantic&logoColor=fff&style=for-the-badge" alt="Pydantic">
   </a>
   <a href="https://www.postgresql.org">
       <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
@@ -35,11 +32,10 @@
 
 ## 0. About
 
-**FastAPI boilerplate** creates an extendable async API using FastAPI, Pydantic V2, SQLAlchemy 2.0 and PostgreSQL:
+**FastAPI boilerplate** creates an extendable async API using FastAPI, SQLModel and PostgreSQL:
 
 - [`FastAPI`](https://fastapi.tiangolo.com): modern Python web framework for building APIs
-- [`Pydantic V2`](https://docs.pydantic.dev/2.4/): the most widely used data Python validation library, rewritten in Rust [`(5x-50x faster)`](https://docs.pydantic.dev/latest/blog/pydantic-v2-alpha/)
-- [`SQLAlchemy 2.0`](https://docs.sqlalchemy.org/en/20/changelog/whatsnew_20.html): Python SQL toolkit and Object Relational Mapper
+- [`SQLModel`](https://sqlmodel.tiangolo.com): SQL databases in Python, designed for simplicity, compatibility, and robustness.
 - [`PostgreSQL`](https://www.postgresql.org): The World's Most Advanced Open Source Relational Database
 - [`Redis`](https://redis.io): Open source, in-memory data store used by millions as a cache, message broker and more.
 - [`ARQ`](https://arq-docs.helpmanual.io) Job queues and RPC in python with asyncio and redis.
@@ -49,7 +45,7 @@
 ## 1. Features
 
 - ⚡️ Fully async
-- 🚀 Pydantic V2 and SQLAlchemy 2.0
+- 🚀 SQLModel with Pydantic V2 and SQLAlchemy 2.0 support
 - 🔐 User authentication with JWT
 - 🍪 Cookie based refresh token
 - 🏬 Easy redis caching
@@ -85,8 +81,8 @@
 1. [Extending](#5-extending)
    1. [Project Structure](#51-project-structure)
    1. [Database Model](#52-database-model)
-   1. [SQLAlchemy Models](#53-sqlalchemy-models)
-   1. [Pydantic Schemas](#54-pydantic-schemas)
+   1. [DB Models](#53-db-models)
+   1. [Validation Models](#54-validation-models)
    1. [Alembic Migrations](#55-alembic-migrations)
    1. [CRUD](#56-crud)
    1. [Routes](#57-routes)
@@ -126,7 +122,7 @@ Start by using the template, and naming the repository to what you want.
 Then clone your created repository (I'm using the base for the example)
 
 ```sh
-git clone https://github.com/igormagalhaesr/FastAPI-boilerplate
+git clone https://github.com/igormagalhaesr/SQLModel-boilerplate
 ```
 
 > \[!TIP\]
@@ -623,20 +619,12 @@ First, you may want to take a look at the project structure and understand what 
     │   ├── middleware                # Middleware components for the application.
     │   │   └── client_cache_middleware.py  # Middleware for client-side caching.
     │   │
-    │   ├── models                    # ORM models for the application (Deprecated/Unused).
-    │   │   ├── __init__.py
-    │   │   ├── post.py               # ORM model for posts.
-    │   │   ├── rate_limit.py         # ORM model for rate limiting.
-    │   │   ├── tier.py               # ORM model for user tiers.
-    │   │   └── user.py               # ORM model for users.
-    │   │
-    │   └── schemas                   # Pydantic schemas for data validation.
+    │   └── models                    # SQLModel db and validation models for the application.
     │       ├── __init__.py
-    │       ├── job.py                # Schema for background jobs.
-    │       ├── post.py               # Schema for post data.
-    │       ├── rate_limit.py         # Schema for rate limiting data.
-    │       ├── tier.py               # Schema for user tier data.
-    │       └── user.py               # Schema for user data.
+    │       ├── post.py               # SQLModel models for posts.
+    │       ├── rate_limit.py         # SQLModel models for rate limiting.
+    │       ├── tier.py               # SQLModel models for user tiers.
+    │       └── user.py               # SQLModel models for users.
     │
     ├── migrations                    # Alembic migration scripts for database changes.
     │   ├── README
@@ -662,46 +650,40 @@ Create the new entities and relationships and add them to the model <br>
 Note that this table is used to blacklist the `JWT` tokens (it's how you log a user out) <br>
 ![diagram](https://user-images.githubusercontent.com/43156212/284426382-b2f3c0ca-b8ea-4f20-b47e-de1bad2ca283.png)
 
-### 5.3 SQLAlchemy Models
+### 5.3 DB Models
 
-Inside `app/models`, create a new `entity.py` for each new entity (replacing entity with the name) and define the attributes according to [SQLAlchemy 2.0 standards](https://docs.sqlalchemy.org/en/20/orm/mapping_styles.html#orm-mapping-styles):
-
-> \[!WARNING\]
-> Note that since it inherits from `Base`, the new model is mapped as a python `dataclass`, so optional attributes (arguments with a default value) should be defined after required  attributes.
+Inside `app/models`, create a new `entity.py` for each new entity (replacing entity with the name) and define the attributes according to [SQLModel standards](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/):
 
 ```python
-from sqlalchemy import String, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.core.db.database import Base
+from sqlmodel import Field, SQLModel
 
 
-class Entity(Base):
+class Entity(SQLModel, table=True):
     __tablename__ = "entity"
 
-    id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
-    name: Mapped[str] = mapped_column(String(30))
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_digits=30)
     ...
 ```
 
-### 5.4 Pydantic Schemas
+### 5.4 Validation Models
 
-Inside `app/schemas`, create a new `entity.py` for for each new entity (replacing entity with the name) and create the schemas according to [Pydantic V2](https://docs.pydantic.dev/latest/#pydantic-examples) standards:
+Inside each `entity.py` in `app/models`, create your SQLModel data validation models for each new entity, you'll now use `table=False` (or just leave it blank, as it's the default):
 
 ```python
-from typing import Annotated
+from sqlmodel import Field, SQLModel
 
-from pydantic import BaseModel, EmailStr, Field, HttpUrl, ConfigDict
+# this should be here already
+class Entity(SQLModel, table=True):
+    __tablename__ = "entity"
 
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_digits=30)
+    ...
 
-class EntityBase(BaseModel):
-    name: Annotated[
-        str,
-        Field(min_length=2, max_length=30, examples=["Entity Name"]),
-    ]
-
-
-class Entity(EntityBase):
+# now we'll create the other validation models
+class EntityBase(SQLModel):
+    name: str
     ...
 
 
@@ -717,16 +699,16 @@ class EntityCreateInternal(EntityCreate):
     ...
 
 
-class EntityUpdate(BaseModel):
+class EntityUpdate(SQLModel):
     ...
 
 
-class EntityUpdateInternal(BaseModel):
+class EntityUpdateInternal(SQLModel):
     ...
 
 
-class EntityDelete(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+class EntityDelete(SQLModel):
+    model_config = {"extra": "forbid"}
 
     is_deleted: bool
     deleted_at: datetime
@@ -753,8 +735,7 @@ Inside `app/crud`, create a new `crud_entities.py` inheriting from `FastCRUD` fo
 ```python
 from fastcrud import FastCRUD
 
-from app.models.entity import Entity
-from app.schemas.entity import EntityCreateInternal, EntityUpdate, EntityUpdateInternal, EntityDelete
+from app.models.entity import Entity, EntityCreateInternal, EntityUpdate, EntityUpdateInternal, EntityDelete
 
 CRUDEntity = FastCRUD[Entity, EntityCreateInternal, EntityUpdate, EntityUpdateInternal, EntityDelete]
 crud_entity = CRUDEntity(Entity)
@@ -764,192 +745,13 @@ So, for users:
 
 ```python
 # crud_users.py
-from app.model.user import User
-from app.schemas.user import UserCreateInternal, UserUpdate, UserUpdateInternal, UserDelete
+from app.model.user import User, UserCreateInternal, UserUpdate, UserUpdateInternal, UserDelete
 
 CRUDUser = FastCRUD[User, UserCreateInternal, UserUpdate, UserUpdateInternal, UserDelete]
 crud_users = CRUDUser(User)
 ```
 
-#### 5.6.1 Get
-
-When actually using the crud in an endpoint, to get data you just pass the database connection and the attributes as kwargs:
-
-```python
-# Here I'm getting the first user with email == user.email (email is unique in this case)
-user = await crud_users.get(db=db, email=user.email)
-```
-
-#### 5.6.2 Get Multi
-
-To get a list of objects with the attributes, you should use the get_multi:
-
-```python
-# Here I'm getting at most 10 users with the name 'User Userson' except for the first 3
-user = await crud_users.get_multi(db=db, offset=3, limit=100, name="User Userson")
-```
-
-> \[!WARNING\]
-> Note that get_multi returns a python `dict`.
-
-Which will return a python dict with the following structure:
-
-```javascript
-{
-  "data": [
-    {
-      "id": 4,
-      "name": "User Userson",
-      "username": "userson4",
-      "email": "user.userson4@example.com",
-      "profile_image_url": "https://profileimageurl.com"
-    },
-    {
-      "id": 5,
-      "name": "User Userson",
-      "username": "userson5",
-      "email": "user.userson5@example.com",
-      "profile_image_url": "https://profileimageurl.com"
-    }
-  ],
-  "total_count": 2,
-  "has_more": false,
-  "page": 1,
-  "items_per_page": 10
-}
-```
-
-#### 5.6.3 Create
-
-To create, you pass a `CreateSchemaType` object with the attributes, such as a `UserCreate` pydantic schema:
-
-```python
-from app.schemas.user import UserCreate
-
-# Creating the object
-user_internal = UserCreate(name="user", username="myusername", email="user@example.com")
-
-# Passing the object to be created
-crud_users.create(db=db, object=user_internal)
-```
-
-#### 5.6.4 Exists
-
-To just check if there is at least one row that matches a certain set of attributes, you should use `exists`
-
-```python
-# This queries only the email variable
-# It returns True if there's at least one or False if there is none
-crud_users.exists(db=db, email=user @ example.com)
-```
-
-#### 5.6.5 Count
-
-You can also get the count of a certain object with the specified filter:
-
-```python
-# Here I'm getting the count of users with the name 'User Userson'
-user = await crud_users.count(db=db, name="User Userson")
-```
-
-#### 5.6.6 Update
-
-To update you pass an `object` which may be a `pydantic schema` or just a regular `dict`, and the kwargs.
-You will update with `objects` the rows that match your `kwargs`.
-
-```python
-# Here I'm updating the user with username == "myusername".
-# #I'll change his name to "Updated Name"
-crud_users.update(db=db, object={"name": "Updated Name"}, username="myusername")
-```
-
-#### 5.6.7 Delete
-
-To delete we have two options:
-
-- db_delete: actually deletes the row from the database
-- delete:
-  - adds `"is_deleted": True` and `deleted_at: datetime.now(UTC)` if the model inherits from `PersistentDeletion` (performs a soft delete), but keeps the object in the database.
-  - actually deletes the row from the database if the model does not inherit from `PersistentDeletion`
-
-```python
-# Here I'll just change is_deleted to True
-crud_users.delete(db=db, username="myusername")
-
-# Here I actually delete it from the database
-crud_users.db_delete(db=db, username="myusername")
-```
-
-#### 5.6.8 Get Joined
-
-To retrieve data with a join operation, you can use the get_joined method from your CRUD module. Here's how to do it:
-
-```python
-# Fetch a single record with a join on another model (e.g., User and Tier).
-result = await crud_users.get_joined(
-    db=db,  # The SQLAlchemy async session.
-    join_model=Tier,  # The model to join with (e.g., Tier).
-    schema_to_select=UserSchema,  # Pydantic schema for selecting User model columns (optional).
-    join_schema_to_select=TierSchema,  # Pydantic schema for selecting Tier model columns (optional).
-)
-```
-
-**Relevant Parameters:**
-
-- `join_model`: The model you want to join with (e.g., Tier).
-- `join_prefix`: Optional prefix to be added to all columns of the joined model. If None, no prefix is added.
-- `join_on`: SQLAlchemy Join object for specifying the ON clause of the join. If None, the join condition is auto-detected based on foreign keys.
-- `schema_to_select`: A Pydantic schema to select specific columns from the primary model (e.g., UserSchema).
-- `join_schema_to_select`: A Pydantic schema to select specific columns from the joined model (e.g., TierSchema).
-- `join_type`: pecifies the type of join operation to perform. Can be "left" for a left outer join or "inner" for an inner join. Default "left".
-- `kwargs`: Filters to apply to the primary query.
-
-This method allows you to perform a join operation, selecting columns from both models, and retrieve a single record.
-
-#### 5.6.9 Get Multi Joined
-
-Similarly, to retrieve multiple records with a join operation, you can use the get_multi_joined method. Here's how:
-
-```python
-# Retrieve a list of objects with a join on another model (e.g., User and Tier).
-result = await crud_users.get_multi_joined(
-    db=db,  # The SQLAlchemy async session.
-    join_model=Tier,  # The model to join with (e.g., Tier).
-    join_prefix="tier_",  # Optional prefix for joined model columns.
-    join_on=and_(User.tier_id == Tier.id, User.is_superuser == True),  # Custom join condition.
-    schema_to_select=UserSchema,  # Pydantic schema for selecting User model columns.
-    join_schema_to_select=TierSchema,  # Pydantic schema for selecting Tier model columns.
-    username="john_doe",  # Additional filter parameters.
-)
-```
-
-**Relevant Parameters:**
-
-- `join_model`: The model you want to join with (e.g., Tier).
-- `join_prefix`: Optional prefix to be added to all columns of the joined model. If None, no prefix is added.
-- `join_on`: SQLAlchemy Join object for specifying the ON clause of the join. If None, the join condition is auto-detected based on foreign keys.
-- `schema_to_select`: A Pydantic schema to select specific columns from the primary model (e.g., UserSchema).
-- `join_schema_to_select`: A Pydantic schema to select specific columns from the joined model (e.g., TierSchema).
-- `join_type`: pecifies the type of join operation to perform. Can be "left" for a left outer join or "inner" for an inner join. Default "left".
-- `kwargs`: Filters to apply to the primary query.
-- `offset`: The offset (number of records to skip) for pagination. Default 0.
-- `limit`: The limit (maximum number of records to return) for pagination. Default 100.
-- `kwargs`: Filters to apply to the primary query.
-
-#### More Efficient Selecting
-
-For the `get` and `get_multi` methods we have the option to define a `schema_to_select` attribute, which is what actually makes the queries more efficient. When you pass a `pydantic schema` (preferred) or a list of the names of the attributes in `schema_to_select` to the `get` or `get_multi` methods, only the attributes in the schema will be selected.
-
-```python
-from app.schemas.user import UserRead
-
-# Here it's selecting all of the user's data
-crud_user.get(db=db, username="myusername")
-
-# Now it's only selecting the data that is in UserRead.
-# Since that's my response_model, it's all I need
-crud_user.get(db=db, username="myusername", schema_to_select=UserRead)
-```
+To understand the methods that `crud_users`, a `FastCRUD` instance provides, head to [FastCRUD's documentation](https://igorbenav.github.io/fastcrud/).
 
 ### 5.7 Routes
 
@@ -960,8 +762,9 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from app.schemas.entity import EntityRead
+from app.models.entity import EntityRead
 from app.core.db.database import async_get_db
+from app.crud.crud_entity import crud_entity
 
 ...
 
@@ -1035,7 +838,9 @@ Then let's create the endpoint:
 ```python
 import fastapi
 
-from app.schemas.entity import EntityRead
+from app.models.entity import EntityRead
+from app.core.db.database import async_get_db
+from app.crud.crud_entity import crud_entity
 
 ...
 
@@ -1305,7 +1110,7 @@ from fastapi import Depends
 
 from app.api.dependencies import rate_limiter
 from app.core.utils import queue
-from app.schemas.job import Job
+from app.models.job import Job
 
 
 @router.post("/task", response_model=Job, status_code=201, dependencies=[Depends(rate_limiter)])
@@ -1318,7 +1123,7 @@ By default, if no token is passed in the header (that is - the user is not authe
 
 Even though this is useful, real power comes from creating `tiers` (categories of users) and standard `rate_limits` (`limits` and `periods` defined for specific `paths` - that is - endpoints) for these tiers.
 
-All of the `tier` and `rate_limit` models, schemas, and endpoints are already created in the respective folders (and usable only by superusers). You may use the `create_tier` script to create the first tier (it uses the `.env` variable `TIER_NAME`, which is all you need to create a tier) or just use the api:
+All of the `tier` and `rate_limit` models and endpoints are already created in the respective folders (and usable only by superusers). You may use the `create_tier` script to create the first tier (it uses the `.env` variable `TIER_NAME`, which is all you need to create a tier) or just use the api:
 
 Here I'll create a `free` tier:
 
@@ -1876,12 +1681,9 @@ Read [contributing](CONTRIBUTING.md).
 
 ## 9. References
 
-This project was inspired by a few projects, it's based on them with things changed to the way I like (and pydantic, sqlalchemy updated)
+This project is a SQLModel version of Fastapi-boilerplate:
 
-- [`Full Stack FastAPI and PostgreSQL`](https://github.com/tiangolo/full-stack-fastapi-postgresql) by @tiangolo himself
-- [`FastAPI Microservices`](https://github.com/Kludex/fastapi-microservices) by @kludex which heavily inspired this boilerplate
-- [`Async Web API with FastAPI + SQLAlchemy 2.0`](https://github.com/rhoboro/async-fastapi-sqlalchemy) for sqlalchemy 2.0 ORM examples
-- [`FastaAPI Rocket Boilerplate`](https://github.com/asacristani/fastapi-rocket-boilerplate/tree/main) for docker compose
+- [`FastAPI-boilerplate`](https://github.com/igorbenav/FastAPI-boilerplate)
 
 ## 10. License
 
