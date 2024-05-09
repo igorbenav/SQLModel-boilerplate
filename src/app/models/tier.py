@@ -1,16 +1,38 @@
-from datetime import UTC, datetime
-
-from sqlalchemy import DateTime, String
-from sqlalchemy.orm import Mapped, mapped_column
-
-from ..core.db.database import Base
+from datetime import datetime
+from typing import Optional
+from sqlmodel import SQLModel, Field
 
 
-class Tier(Base):
-    __tablename__ = "tier"
+class TierBase(SQLModel):
+    name: str = Field(..., schema_extra={"example": "free"})
 
-    id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
-    name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: datetime.now(UTC))
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+class Tier(TierBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    updated_at: Optional[datetime] = None
+
+
+class TierRead(TierBase):
+    id: int
+    created_at: datetime
+
+
+class TierCreate(TierBase):
+    pass
+
+
+class TierCreateInternal(TierCreate):
+    pass
+
+
+class TierUpdate(SQLModel):
+    name: Optional[str] = None
+
+
+class TierUpdateInternal(TierUpdate):
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+
+class TierDelete(SQLModel):
+    pass

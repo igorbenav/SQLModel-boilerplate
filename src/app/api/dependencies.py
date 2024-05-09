@@ -13,7 +13,7 @@ from ..crud.crud_rate_limit import crud_rate_limits
 from ..crud.crud_tier import crud_tiers
 from ..crud.crud_users import crud_users
 from ..models.user import User
-from ..schemas.rate_limit import sanitize_path
+from ..models.rate_limit import sanitize_path
 
 logger = logging.getLogger(__name__)
 

@@ -1,28 +1,71 @@
-import uuid as uuid_pkg
-from datetime import UTC, datetime
+from datetime import datetime
+from typing import Optional
+from uuid import uuid4
 
-from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
-
-from ..core.db.database import Base
+from sqlmodel import SQLModel, Field
+from pydantic import validator
 
 
-class User(Base):
-    __tablename__ = "user"
+class UserBase(SQLModel):
+    name: str = Field(..., min_length=2, max_length=30, schema_extra={"example": "User Userson"})
+    username: str = Field(..., min_length=2, max_length=20, regex="^[a-z0-9]+$", schema_extra={"example": "userson"})
+    email: str = Field(..., schema_extra={"example": "user.userson@example.com"})
 
-    id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
 
-    name: Mapped[str] = mapped_column(String(30))
-    username: Mapped[str] = mapped_column(String(20), unique=True, index=True)
-    email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
-    hashed_password: Mapped[str] = mapped_column(String)
+class User(UserBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    profile_image_url: str = Field("https://www.profileimageurl.com")
+    hashed_password: str
+    is_superuser: bool = Field(default=False)
+    tier_id: Optional[int] = Field(default=None, foreign_key="tier.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+    is_deleted: bool = Field(default=False)
 
-    profile_image_url: Mapped[str] = mapped_column(String, default="https://profileimageurl.com")
-    uuid: Mapped[uuid_pkg.UUID] = mapped_column(default_factory=uuid_pkg.uuid4, primary_key=True, unique=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: datetime.now(UTC))
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    is_deleted: Mapped[bool] = mapped_column(default=False, index=True)
-    is_superuser: Mapped[bool] = mapped_column(default=False)
 
-    tier_id: Mapped[int | None] = mapped_column(ForeignKey("tier.id"), index=True, default=None, init=False)
+class UserRead(SQLModel):
+    id: int
+    name: str
+    username: str
+    email: str
+    profile_image_url: str
+    tier_id: Optional[int]
+
+
+class UserCreate(UserBase):
+    password: str = Field(..., regex="^.{8,}|[0-9]+|[A-Z]+|[a-z]+|[^a-zA-Z0-9]+$", schema_extra={"example": "Str1ngst!"})
+
+    @validator('password')
+    def validate_password(cls, value):
+        if len(value) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        return value
+
+
+class UserCreateInternal(UserBase):
+    hashed_password: str
+
+
+class UserUpdate(SQLModel):
+    name: Optional[str] = Field(None, min_length=2, max_length=30)
+    username: Optional[str] = Field(None, min_length=2, max_length=20, regex="^[a-z0-9]+$")
+    email: Optional[str] = None
+    profile_image_url: Optional[str] = None
+
+
+class UserUpdateInternal(UserUpdate):
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+
+class UserTierUpdate(SQLModel):
+    tier_id: int
+
+
+class UserDelete(SQLModel):
+    is_deleted: bool
+    deleted_at: datetime
+
+
+class UserRestoreDeleted(SQLModel):
+    is_deleted: bool

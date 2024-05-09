@@ -1,23 +1,49 @@
-import uuid as uuid_pkg
-from datetime import UTC, datetime
-
-from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
-
-from ..core.db.database import Base
+from datetime import datetime
+from typing import Optional
+from sqlmodel import SQLModel, Field, Relationship
+from uuid import uuid4
 
 
-class Post(Base):
-    __tablename__ = "post"
+class PostBase(SQLModel):
+    title: str = Field(..., min_length=2, max_length=30, schema_extra={"example": "This is my post"})
+    text: str = Field(..., min_length=1, max_length=63206, schema_extra={"example": "This is the content of my post."})
 
-    id: Mapped[int] = mapped_column("id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
-    created_by_user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True)
-    title: Mapped[str] = mapped_column(String(30))
-    text: Mapped[str] = mapped_column(String(63206))
-    uuid: Mapped[uuid_pkg.UUID] = mapped_column(default_factory=uuid_pkg.uuid4, primary_key=True, unique=True)
-    media_url: Mapped[str | None] = mapped_column(String, default=None)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default_factory=lambda: datetime.now(UTC))
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
-    is_deleted: Mapped[bool] = mapped_column(default=False, index=True)
+class Post(PostBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    created_by_user_id: int = Field(foreign_key="user.id")
+    media_url: Optional[str] = Field(default=None, regex=r"^(https?|ftp)://[^\s/$.?#].[^\s]*$", schema_extra={"example": "https://www.postimageurl.com"})
+    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+    is_deleted: bool = Field(default=False)
+
+
+class PostRead(PostBase):
+    id: int
+    created_by_user_id: int
+    media_url: Optional[str]
+    created_at: datetime
+
+
+class PostCreate(PostBase):
+    media_url: Optional[str] = Field(default=None, regex=r"^(https?|ftp)://[^\s/$.?#].[^\s]*$", schema_extra={"example": "https://www.postimageurl.com"})
+
+
+class PostCreateInternal(PostCreate):
+    created_by_user_id: int
+
+
+class PostUpdate(SQLModel):
+    title: Optional[str] = Field(default=None, min_length=2, max_length=30)
+    text: Optional[str] = Field(default=None, min_length=1, max_length=63206)
+    media_url: Optional[str] = Field(default=None, regex=r"^(https?|ftp)://[^\s/$.?#].[^\s]*$")
+
+
+class PostUpdateInternal(PostUpdate):
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+
+class PostDelete(SQLModel):
+    is_deleted: bool
+    deleted_at: datetime

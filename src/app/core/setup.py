@@ -10,6 +10,7 @@ from arq.connections import RedisSettings
 from fastapi import APIRouter, Depends, FastAPI
 from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+from sqlmodel import SQLModel
 
 from ..api.dependencies import get_current_superuser
 from ..middleware.client_cache_middleware import ClientCacheMiddleware
@@ -24,7 +25,6 @@ from .config import (
     RedisRateLimiterSettings,
     settings,
 )
-from .db.database import Base
 from .db.database import async_engine as engine
 from .utils import cache, queue, rate_limit
 
@@ -32,7 +32,7 @@ from .utils import cache, queue, rate_limit
 # -------------- database --------------
 async def create_tables() -> None:
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(SQLModel.metadata.create_all)
 
 
 # -------------- cache --------------

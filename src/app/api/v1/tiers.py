@@ -8,7 +8,7 @@ from ...api.dependencies import get_current_superuser
 from ...core.db.database import async_get_db
 from ...core.exceptions.http_exceptions import DuplicateValueException, NotFoundException
 from ...crud.crud_tier import crud_tiers
-from ...schemas.tier import TierCreate, TierCreateInternal, TierRead, TierUpdate
+from ...models.tier import TierCreate, TierCreateInternal, TierRead, TierUpdate
 
 router = APIRouter(tags=["tiers"])
 

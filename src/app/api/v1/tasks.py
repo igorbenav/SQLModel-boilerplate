@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 
 from ...api.dependencies import rate_limiter
 from ...core.utils import queue
-from ...schemas.job import Job
+from ...models.job import Job
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 

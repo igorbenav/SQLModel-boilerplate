@@ -42,6 +42,9 @@
 - [`Docker Compose`](https://docs.docker.com/compose/) With a single command, create and start all the services from your configuration.
 - [`NGINX`](https://nginx.org/en/) High-performance low resource consumption web server used for Reverse Proxy and Load Balancing.
 
+> \[!TIP\] 
+> If you want the `SQLAlchemy + Pydantic` version instead, head to [Fastapi-boilerplate](https://github.com/igorbenav/FastAPI-boilerplate).
+
 ## 1. Features
 
 - ⚡️ Fully async

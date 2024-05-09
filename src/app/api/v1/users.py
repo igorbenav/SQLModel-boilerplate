@@ -11,9 +11,8 @@ from ...core.security import blacklist_token, get_password_hash, oauth2_scheme
 from ...crud.crud_rate_limit import crud_rate_limits
 from ...crud.crud_tier import crud_tiers
 from ...crud.crud_users import crud_users
-from ...models.tier import Tier
-from ...schemas.tier import TierRead
-from ...schemas.user import UserCreate, UserCreateInternal, UserRead, UserTierUpdate, UserUpdate
+from ...models.tier import Tier, TierRead
+from ...models.user import UserCreate, UserCreateInternal, UserRead, UserTierUpdate, UserUpdate
 
 router = APIRouter(tags=["users"])
 

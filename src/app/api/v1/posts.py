@@ -10,8 +10,8 @@ from ...core.exceptions.http_exceptions import ForbiddenException, NotFoundExcep
 from ...core.utils.cache import cache
 from ...crud.crud_posts import crud_posts
 from ...crud.crud_users import crud_users
-from ...schemas.post import PostCreate, PostCreateInternal, PostRead, PostUpdate
-from ...schemas.user import UserRead
+from ...models.post import PostCreate, PostCreateInternal, PostRead, PostUpdate
+from ...models.user import UserRead
 
 router = APIRouter(tags=["posts"])
 
