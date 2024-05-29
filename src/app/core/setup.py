@@ -27,7 +27,7 @@ from .config import (
 )
 from .db.database import async_engine as engine
 from .utils import cache, queue, rate_limit
-
+from ..models import *
 
 # -------------- database --------------
 async def create_tables() -> None:
