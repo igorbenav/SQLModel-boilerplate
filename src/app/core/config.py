@@ -35,18 +35,6 @@ class SQLiteSettings(DatabaseSettings):
     SQLITE_ASYNC_PREFIX: str = config("SQLITE_ASYNC_PREFIX", default="sqlite+aiosqlite:///")
 
 
-class MySQLSettings(DatabaseSettings):
-    MYSQL_USER: str = config("MYSQL_USER", default="username")
-    MYSQL_PASSWORD: str = config("MYSQL_PASSWORD", default="password")
-    MYSQL_SERVER: str = config("MYSQL_SERVER", default="localhost")
-    MYSQL_PORT: int = config("MYSQL_PORT", default=5432)
-    MYSQL_DB: str = config("MYSQL_DB", default="dbname")
-    MYSQL_URI: str = f"{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_SERVER}:{MYSQL_PORT}/{MYSQL_DB}"
-    MYSQL_SYNC_PREFIX: str = config("MYSQL_SYNC_PREFIX", default="mysql://")
-    MYSQL_ASYNC_PREFIX: str = config("MYSQL_ASYNC_PREFIX", default="mysql+aiomysql://")
-    MYSQL_URL: str = config("MYSQL_URL", default=None)
-
-
 class PostgresSettings(DatabaseSettings):
     POSTGRES_USER: str = config("POSTGRES_USER", default="postgres")
     POSTGRES_PASSWORD: str = config("POSTGRES_PASSWORD", default="postgres")
@@ -105,13 +93,24 @@ class EnvironmentOption(Enum):
     PRODUCTION = "production"
 
 
+class DBOption(Enum):
+    POSTGRES = "postgres"
+    SQLITE = "sqlite"
+
+
 class EnvironmentSettings(BaseSettings):
     ENVIRONMENT: EnvironmentOption = config("ENVIRONMENT", default="local")
+    DB_ENGINE: DBOption = config("DB_ENGINE", default="sqlite")
+
+
+db_type = PostgresSettings
+if config("DB_ENGINE", default="sqlite") == "sqlite":
+    db_type = SQLiteSettings
 
 
 class Settings(
     AppSettings,
-    PostgresSettings,
+    db_type,
     CryptSettings,
     FirstUserSettings,
     TestSettings,
