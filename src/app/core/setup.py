@@ -91,14 +91,15 @@ def lifespan_factory(
         if isinstance(settings, DatabaseSettings) and create_tables_on_start:
             await create_tables()
 
-        if isinstance(settings, RedisCacheSettings):
-            await create_redis_cache_pool()
+        if settings.ENVIRONMENT != EnvironmentOption.LOCAL:
+            if isinstance(settings, RedisCacheSettings):
+                await create_redis_cache_pool()
 
-        if isinstance(settings, RedisQueueSettings):
-            await create_redis_queue_pool()
+            if isinstance(settings, RedisQueueSettings):
+                await create_redis_queue_pool()
 
-        if isinstance(settings, RedisRateLimiterSettings):
-            await create_redis_rate_limit_pool()
+            if isinstance(settings, RedisRateLimiterSettings):
+                await create_redis_rate_limit_pool()
 
         yield
 
