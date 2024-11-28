@@ -37,7 +37,7 @@
 - [`FastAPI`](https://fastapi.tiangolo.com): modern Python web framework for building APIs
 - [`SQLModel`](https://sqlmodel.tiangolo.com): SQL databases in Python, designed for simplicity, compatibility, and robustness.
 - [`PostgreSQL`](https://www.postgresql.org): The World's Most Advanced Open Source Relational Database
-- [`Redis`](https://redis.io): Open source, in-memory data store used by millions as a cache, message broker and more.
+- [`Redis`](https://redis.io): Source Available, in-memory data store used by millions as a cache, message broker and more.
 - [`ARQ`](https://arq-docs.helpmanual.io) Job queues and RPC in python with asyncio and redis.
 - [`Docker Compose`](https://docs.docker.com/compose/) With a single command, create and start all the services from your configuration.
 - [`NGINX`](https://nginx.org/en/) High-performance low resource consumption web server used for Reverse Proxy and Load Balancing.
